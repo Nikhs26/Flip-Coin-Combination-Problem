@@ -1,59 +1,165 @@
-#! /bin/bash
+#!/bin/bash
+print_winner ()
+{
+    #Inside the function, using local -n ref=$1 to declare a nameref to the variable named by $1, meaning it's not a reference to $1 itself, but rather to a variable whose name $1 holds
+    local -n keys=$1
+    local -n values=$2
 
-echo "Welcome to flip coin combination"
-
-declare -A flipCoin
-IS_HEAD=1
-counter=0
-headCount=0
-tailCount=0
-
-read -p "How many times you want to flip coin " noOfTime
-
-#read -p "How many coins you want to flip at same time " noOfCoin
-
-function flipCoinFunction(){
-
-	flipCoinResult=$((RANDOM%2))
-	#echo $flipCoinResult
-
-	if [ $flipCoinResult -eq $IS_HEAD ]
-	then
-		((headCount++))
-		echo "H"
-	else
-		echo "T"
-		((tailCount++))
-	fi
+    max_value=0
+    max_value_index=0
+    for(( i = 0; i < ${#values[@]}; i++ ))
+    do
+        if(( values[i] >= max_value ))
+        then    
+                max_value=${values[i]}
+                max_value_index=$i
+        fi
+    done
+    echo "The winning combination is ${keys[$max_value_index]} with ${max_value}%" 
 }
 
-while [ $counter -lt $noOfTime ]
+read -p "Enter number of times to flip a combination:" no_of_flips
+
+echo 
+echo "---------------------------SINGLET-COMBINATION---------------------------"
+#for singlet there 2^1=2 possible outcomes
+declare -A singlet_frequency=( 
+
+                                [H]=0
+                                [T]=0
+
+                              )
+for(( flip = 1; flip <= no_of_flips; flip++ ))
 do
-		returnValueFromFunction=`flipCoinFunction`
-		returnValueFromFunction1=`flipCoinFunction`
-		returnValueFromFunction2=`flipCoinFunction`
-		doubletCombination="$returnValueFromFunction$returnValueFromFunction1$returnValueFromFunction2"
-		flipCoin[$counter]=$doubletCombination
-		if [ ${flipCoin[$counter]} == 'HHH' ]
-		then
-			((headCount++))
-		else
-			((tailCount++))
-		fi
-#		flipCoin[$counter]=`echo ${flipCoin[$counter]}$returnValueFromFunction`
-		((counter++))
+    echo -n "Flip-$flip is "
+    (( coin = RANDOM % 2 ))
+    case $coin in 
+        0)
+            echo "Heads"
+            (( singlet_frequency[H]++ ))
+            ;;
+        1)
+            echo "Tails"
+            (( singlet_frequency[T]++ ))
+    esac
 done
 
-for key in "${!flipCoin[@]}"; do
-    echo "$key ${flipCoin[$key]}"
+for combination in ${!singlet_frequency[@]}
+do
+    #update count values  with corresponding percentage
+    percentage=$(( ${singlet_frequency[$combination]}  * 100 / no_of_flips ))
+    singlet_frequency[$combination]=$percentage
+    echo "percentage of $combination is ${singlet_frequency[$combination]}%"   
 done
 
+echo "---------------------------DOUBLET-COMBINATION---------------------------"
+#for doublelet there 2^2=4 possible outcomes
+declare -A doublet_frequency=( 
 
-echo $headCount $tailCount
-#Percentage of  head
-percnetageOfHead=$(((($headCount)*100)/$noOfTime))
-echo "Percentage of head " $percnetageOfHead
+                                [HH]=0
+                                [HT]=0
+                                [TH]=0
+                                [TT]=0
 
-#Percentage of tail
-percentageofTail=$((100-$percnetageOfHead))
-echo "Percentage of tail "$percentageofTail
+                              )
+
+for(( flip = 1; flip <= no_of_flips; flip++ ))
+do
+    echo -n "Flip-$flip is "
+    (( coin_1 = RANDOM % 2 ))
+    (( coin_2 = RANDOM % 2 ))
+
+    #0 is mapped as heads
+    #1 is mappes as tails
+    case $coin_1$coin_2 in 
+        00)
+            echo "Heads Heads"
+            (( doublet_frequency[HH]++ )) 
+            ;;
+        01)
+            echo "Heads Tails"
+            (( doublet_frequency[HT]++ ))
+            ;;
+        10)
+            echo "Tails Heads"
+            (( doublet_frequency[TH]++ ))
+            ;;
+        11)
+            echo "Tails Tails"
+            (( doublet_frequency[TT]++ ))
+            ;;
+    esac
+done
+
+for combination in ${!doublet_frequency[@]}
+do
+    #update count values  with corresponding percentage
+    percentage=$(( ${doublet_frequency[$combination]}  * 100 / no_of_flips ))
+    doublet_frequency[$combination]=$percentage
+    echo "percentage of $combination is ${doublet_frequency[$combination]}%"   
+done
+
+echo "---------------------------TRIPLET-COMBINATION---------------------------"
+#for triplet there 2^3=8 possible outcomes
+declare -A triplet_frequency=( 
+                                    [HHH]=0
+                                    [HHT]=0
+                                    [HTH]=0
+                                    [HTT]=0
+                                    [THH]=0
+                                    [THT]=0
+                                    [TTH]=0
+                                    [TTT]=0
+                            
+                                )
+for(( flip = 1; flip <= no_of_flips; flip++ ))
+do
+    echo -n "Flip-$flip is "
+    (( coin_1 = RANDOM % 2 ))
+    (( coin_2 = RANDOM % 2 ))
+    (( coin_3 = RANDOM % 2 ))
+
+    #0 is mapped as heads
+    #1 is mappes as tails
+    case $coin_1$coin_2$coin_3 in 
+        000)
+            echo "Heads Heads Heads"
+            (( triplet_frequency[HHH]++ )) 
+            ;;
+        001)
+            echo "Heads Heads Tails"
+            (( triplet_frequency[HHT]++ ))
+            ;;
+        010)
+            echo "Heads Tails Heads"
+            (( triplet_frequency[HTH]++ ))
+            ;;
+        011)
+            echo "Heads Tails Tails"
+            (( triplet_frequency[HTT]++ ))
+            ;;
+        100)
+            echo "Tails Heads Heads"
+            (( triplet_frequency[THH]++ )) 
+            ;;
+        101)
+            echo "Tails Heads Tails"
+            (( triplet_frequency[THT]++ ))
+            ;;
+        110)
+            echo "Tails Tails Heads"
+            (( triplet_frequency[TTH]++ ))
+            ;;
+        111)
+           echo "Tails Tails Tails"
+            (( triplet_frequency[TTT]++ ))
+            ;;
+    esac
+done
+for combination in ${!triplet_frequency[@]}
+do
+    #update count values  with corresponding percentage
+    percentage=$(( ${triplet_frequency[$combination]}  * 100 / no_of_flips ))
+    triplet_frequency[$combination]=$percentage
+    echo "percentage of $combination is ${triplet_frequency[$combination]}%"   
+done
