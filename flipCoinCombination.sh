@@ -31,9 +31,10 @@ while [ $counter -lt $noOfTime ]
 do
 		returnValueFromFunction=`flipCoinFunction`
 		returnValueFromFunction1=`flipCoinFunction`
-		doubletCombination="$returnValueFromFunction$returnValueFromFunction1"
+		returnValueFromFunction2=`flipCoinFunction`
+		doubletCombination="$returnValueFromFunction$returnValueFromFunction1$returnValueFromFunction2"
 		flipCoin[$counter]=$doubletCombination
-		if [ ${flipCoin[$counter]} == 'HH' ]
+		if [ ${flipCoin[$counter]} == 'HHH' ]
 		then
 			((headCount++))
 		else
@@ -56,4 +57,3 @@ echo "Percentage of head " $percnetageOfHead
 #Percentage of tail
 percentageofTail=$((100-$percnetageOfHead))
 echo "Percentage of tail "$percentageofTail
-
